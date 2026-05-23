@@ -69,16 +69,22 @@
 
 ---
 
-## Stage 4 — Демонстрационный деплой
+## Stage 4 — Демонстрационный деплой ✅
 
 Цель: бот доступен в Telegram во время защиты.
 
-- [ ] Выбрать хостинг (Railway / Render / VPS).
-- [ ] Прописать переменные окружения на хостинге.
-- [ ] Запустить и проверить через Telegram.
-- [ ] README: раздел «Деплой» с шагами.
-- [ ] Сделать screenshot/screencast на запасной случай.
-- [ ] (Опционально) Dockerfile.
+- [x] `src/weather/client.py` — погода через Open-Meteo (без ключа), геокодинг, оценка условий
+- [x] `src/bot/handlers/weather.py` — FSM-хендлер, поддержка города и координат
+- [x] `src/bot/keyboards.py` — кнопка «🌦 Погода для полёта»
+- [x] `data/topics/restricted_zones.yaml` — улучшен текст, ссылки на регуляторов
+- [x] `data/topics/links.yaml` — убран Airmap, добавлен Небосвод и Open-Meteo
+- [x] `Dockerfile` + `docker-compose.yml` — long polling, restart: unless-stopped
+- [x] README: разделы «Погодная проверка» и «Запуск через Docker»
+- [x] `docs/DECISIONS.md` + `docs/SOURCES.md` обновлены
+- [ ] Залить на VPS, запустить `docker compose up -d --build`
+- [ ] Прописать `TELEGRAM_BOT_TOKEN` на сервере
+- [ ] Проверить через Telegram (smoke-тест)
+- [ ] Сделать screenshot/screencast на запасной случай
 
 ---
 

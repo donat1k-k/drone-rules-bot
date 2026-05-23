@@ -19,6 +19,7 @@ def main_menu_kb() -> InlineKeyboardMarkup:
     builder = InlineKeyboardBuilder()
     for label, cb_data in _SECTIONS:
         builder.button(text=label, callback_data=cb_data)
+    builder.button(text="🌦 Погода для полёта", callback_data="weather")
     if AI_ENABLED and OPENAI_API_KEY:
         builder.button(text="🤖 Спросить ИИ", callback_data="ai")
     builder.adjust(1)

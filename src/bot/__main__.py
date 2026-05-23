@@ -7,6 +7,7 @@ from aiogram.fsm.storage.memory import MemoryStorage
 from src.config import BOT_TOKEN, LOG_LEVEL
 from src.bot.handlers import common, topics
 from src.bot.handlers import ai as ai_handler
+from src.bot.handlers import weather as weather_handler
 
 
 async def main() -> None:
@@ -16,8 +17,9 @@ async def main() -> None:
     )
     bot = Bot(token=BOT_TOKEN)
     dp = Dispatcher(storage=MemoryStorage())
-    # AI router first — its FSM state filter must win over common's fallback
+    # FSM routers first — their state filters must win over common's fallback
     dp.include_router(ai_handler.router)
+    dp.include_router(weather_handler.router)
     dp.include_router(topics.router)
     dp.include_router(common.router)
     await dp.start_polling(bot)

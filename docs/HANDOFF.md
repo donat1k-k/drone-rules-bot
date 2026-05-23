@@ -3,7 +3,7 @@
 > Обновляй этот файл после каждого Stage / значимого изменения. Это главный документ для входящего агента.
 
 **Дата последнего обновления:** 2026-05-24
-**Текущий Stage:** 3.1 (hotfix) — завершён. Готов к Stage 4 (деплой).
+**Текущий Stage:** 4 — завершён. Готов к деплою на VPS.
 
 ---
 
@@ -13,35 +13,37 @@
 
 ## Current State
 
-Stage 3 завершён. Бот работает локально. Добавлен AI-режим через OpenAI-compatible API. По умолчанию выключен (`AI_ENABLED=false`). При включении появляется кнопка «🤖 Спросить ИИ» в главном меню. Бот отвечает через FSM: пользователь нажимает кнопку, пишет вопрос, получает ответ с дисклеймером. При ошибке провайдера бот не падает. Готов к Stage 4 (деплой).
+Stage 4 завершён. Бот работает локально. Добавлены:
+- Погодная функция «🌦 Погода для полёта» через Open-Meteo API (без ключа).
+- Docker-деплой: `Dockerfile` + `docker-compose.yml`, запуск через `docker compose up -d --build`.
+- Улучшен раздел «Запрещённые зоны»: конкретные ссылки на Росавиацию, Небосвод, DJI Fly Safe; явный дисклеймер «бот не определяет запретные зоны».
+- Убраны ссылки на Airmap; добавлен Open-Meteo в links.yaml и SOURCES.md.
+
+Готов к деплою на VPS.
 
 ## Completed
 
 - **Stage 0:** документация и рамки проекта.
 - **Stage 1:** базовый Telegram-бот (aiogram 3.x, 8 разделов, YAML база знаний).
 - **Stage 2:** улучшенный контент и текстовый поиск.
-  - `data/topics/*.yaml` — все 8 файлов обновлены: добавлено поле `keywords`, улучшено форматирование, FAQ расширен до 11 вопросов
-  - `src/knowledge/search.py` — новый модуль: простой keyword-поиск по топикам без NLP-библиотек
-  - `src/bot/keyboards.py` — добавлена `search_result_kb(topic_id)` для результатов поиска
-  - `src/bot/handlers/common.py` — fallback теперь ищет ответ через `search_knowledge()`, `/help` объясняет текстовый поиск
-  - `docs/SOURCES.md` — заполнены секции 2, 3, 4 (нормативные акты, карта зон, уведомление ОВД); всё с пометками «требует ручной проверки»
-  - `README.md` — обновлён: упомянут поиск, AI статус, новый smoke-тест
 - **Stage 3:** AI-режим через OpenAI-compatible API.
-  - `src/ai/client.py` — обёртка: строит компактный контекст из YAML (title + keywords), системный промпт с запретом выдумывать законы, graceful degradation
-  - `src/config.py` — добавлены `AI_ENABLED`, `OPENAI_API_KEY`, `OPENAI_BASE_URL`, `OPENAI_MODEL`
-  - `src/bot/handlers/ai.py` — FSM-хендлер: состояние `AiState.waiting_question`, typing indicator, ответ с кнопкой «← Главное меню»
-  - `src/bot/keyboards.py` — кнопка «🤖 Спросить ИИ» только при `AI_ENABLED=true` и наличии ключа
-  - `src/bot/__main__.py` — добавлен `MemoryStorage`, AI-роутер подключён первым
-  - `src/bot/handlers/common.py` — `cb_menu`, `/start`, `/help` сбрасывают FSM-состояние
-  - `requirements.txt` — добавлен `openai>=1.0`
-  - `.env.example` — очищен от лишнего, добавлены комментарии про Polza AI
-  - `README.md` — раздел «Настройка AI-режима», обновлён smoke-тест
 - **Stage 3.1 (hotfix):** AI-ответы без Markdown-мусора.
-  - `src/ai/client.py` — системный промпт запрещает Markdown; `_strip_markdown()` зачищает `**`, `__`, `###`, `~~`, `` ` `` как страховку.
+- **Stage 4:** погода + Docker.
+  - `src/weather/__init__.py` + `src/weather/client.py` — Open-Meteo: геокодинг + прогноз, оценка условий, graceful degradation
+  - `src/bot/handlers/weather.py` — FSM-хендлер `WeatherState.waiting_location`; поддержка города и координат (`lat, lon`); дисклеймер в каждом ответе
+  - `src/bot/keyboards.py` — кнопка «🌦 Погода для полёта» (всегда видима, ключ не нужен)
+  - `src/bot/__main__.py` — weather-роутер зарегистрирован перед common-роутером
+  - `requirements.txt` — добавлен `aiohttp>=3.9`
+  - `data/topics/restricted_zones.yaml` — улучшен текст, добавлены ссылки, убран Airmap
+  - `data/topics/links.yaml` — убран Airmap, добавлен Небосвод и Open-Meteo
+  - `Dockerfile` + `docker-compose.yml` — long polling, `env_file: .env`, `restart: unless-stopped`
+  - `README.md` — разделы «Погодная проверка» и «Запуск через Docker»; обновлён smoke-тест
+  - `docs/DECISIONS.md` — записи про Open-Meteo, aiohttp, Docker
+  - `docs/SOURCES.md` — добавлены Open-Meteo (секция 7) и Небосвод (секция 9)
 
 ## Files in Flight
 
-Нет. Все файлы Stage 3.1 завершены.
+Нет. Все файлы Stage 4 завершены.
 
 ## Failed Attempts
 
@@ -49,33 +51,31 @@ Stage 3 завершён. Бот работает локально. Добавл
 
 ## Known Issues
 
-- `docs/SOURCES.md` секции 1, 2, 3, 4 — все URL имеют статус «требует ручной проверки». Нужно открыть каждый и найти актуальный прямой URL перед защитой.
-- Ограничение 4096 символов: все разделы в пределах нормы (проверить вручную при расширении контента).
-- Текстовый поиск — keyword-матчинг без стемминга. Покрывает основные запросы; сложные перефразировки может не найти — это ожидаемо для простого поиска.
+- `docs/SOURCES.md` — большинство URL имеет статус «требует ручной проверки». Открой каждый перед защитой.
+- Небосвод — URL не верифицирован в коде. В тексте бота написано «найди в браузере». Нужно найти актуальный URL перед защитой.
+- Ограничение 4096 символов: все разделы в пределах нормы (проверить вручную при расширении).
+- `MemoryStorage` — состояние сбрасывается при перезапуске бота. Для демо это ок.
 
 ## Decisions
 
 См. полный журнал в [DECISIONS.md](DECISIONS.md).
 
-**Stage 2 решение:** добавлено поле `keywords` в YAML-топики — это расширение структуры данных, но обратно совместимое (`topic.get("keywords", [])` не ломает существующий код).
-
 ## Next Step
 
-**Stage 4 — Деплой для демонстрации.**
+**Деплой на VPS для защиты:**
 
-1. Выбрать хостинг (Railway / Render / VPS).
-2. Задать переменные окружения (`TELEGRAM_BOT_TOKEN`, и опционально AI-переменные) на хостинге.
-3. Запустить и проверить через Telegram.
-4. README: раздел «Деплой» с шагами.
-5. Сделать screenshot/screencast на запасной случай.
+1. Залить репозиторий на VPS (git clone или scp).
+2. Скопировать `.env.example` → `.env`, вписать `TELEGRAM_BOT_TOKEN`.
+3. `docker compose up -d --build`
+4. `docker compose logs -f` — убедиться, что бот запустился.
+5. Открыть Telegram, отправить `/start` — проверить меню.
+6. Сделать screenshot/screencast на запасной случай.
 
 ## Notes for Next Agent
 
 - Запуск бота: `python -m src.bot` из корня проекта.
 - Структура YAML: `id`, `title`, `body`, `disclaimer` (опц.), `keywords` (список строк). Не менять структуру без записи в DECISIONS.md.
 - Токен и ключи — только в `.env`, не в коде.
-- `src/knowledge/loader.py` — не трогать (работает как есть).
-- `src/knowledge/search.py` — можно улучшать алгоритм поиска, не меняя интерфейс функции.
-- AI-роутер (`src/bot/handlers/ai.py`) регистрируется в `__main__.py` **первым** — это важно, иначе fallback в common-роутере перехватит сообщения в состоянии `AiState.waiting_question`.
-- `MemoryStorage` — состояние сбрасывается при перезапуске бота. Для Stage 4 это ок; для production нужен Redis-хранилище.
+- AI-роутер и weather-роутер в `__main__.py` регистрируются **перед** common-роутером — это важно, иначе fallback перехватит FSM-сообщения.
+- Open-Meteo не требует ключа — погода работает всегда.
 - При смене провайдера AI — только `.env` (OPENAI_BASE_URL, OPENAI_MODEL, OPENAI_API_KEY).

@@ -59,11 +59,11 @@
 
 ---
 
-## 2026-05-23 — Docker: позже
+## 2026-05-24 — Docker: long polling, без webhook
 
-**Context.** Срок 1.5 дня. Docker полезен, но не критичен для демо.
-**Decision.** На Stage 1–3 не делаем Dockerfile. Если останется время — добавим на Stage 4.
-**Consequences.** Деплой пойдёт через нативный Python runtime хостинга (Railway/Render/VPS с systemd).
+**Context.** Stage 4 — деплой на VPS. Нужен простой способ запустить бота в контейнере.
+**Decision.** `Dockerfile` + `docker-compose.yml`. Long polling (не webhook) — не нужен домен, HTTPS, nginx. `restart: unless-stopped` — бот поднимается автоматически после перезапуска сервера. Секреты через `env_file: .env`.
+**Consequences.** Запуск одной командой: `docker compose up -d --build`. Webhook и Caddy/nginx — вне scope этого проекта.
 
 ---
 
@@ -80,6 +80,20 @@
 **Context.** Stage 3 требует вызова OpenAI-compatible API. Нужна одна библиотека, которая поддерживает `base_url` для сторонних провайдеров (Polza AI и др.).
 **Decision.** Библиотека `openai>=1.0` — официальный клиент, поддерживает `AsyncOpenAI(base_url=..., api_key=...)` для любого совместимого провайдера. Импорт ленивый (внутри функции `ask()`): если библиотека не установлена, ошибка перехватывается и бот не падает.
 **Consequences.** Одна зависимость покрывает всех OpenAI-compatible провайдеров. Переключение провайдера — только через `.env`.
+
+---
+
+## 2026-05-24 — Погодный API: Open-Meteo + aiohttp
+
+**Context.** Stage 4 добавляет функцию «Погода для полёта». Нужен бесплатный погодный API без обязательного ключа.
+**Decision.**
+- Погода: [Open-Meteo](https://open-meteo.com) — бесплатный, без ключа, JSON, возвращает `temperature_2m`, `wind_speed_10m`, `precipitation`. URL: `https://api.open-meteo.com/v1/forecast`.
+- Геокодинг: Open-Meteo Geocoding API — тот же провайдер, без ключа. URL: `https://geocoding-api.open-meteo.com/v1/search`.
+- HTTP-клиент: `aiohttp>=3.9` — уже транзитивная зависимость aiogram, добавлена явно т.к. используется напрямую.
+- Логика оценки: ветер ≥ 10 м/с или осадки > 0 → ⛔; ветер 5–9.9 м/с → ⚠️; иначе → ✅.
+- Оценка справочная, дисклеймер обязателен в каждом ответе.
+
+**Consequences.** Нет платных API. Нет новых секретов. Одна зависимость (`aiohttp`). Если Open-Meteo недоступен — бот отвечает сообщением об ошибке и не падает.
 
 ---
 
