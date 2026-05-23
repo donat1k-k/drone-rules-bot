@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import logging
+import re
 
 from src import config
 from src.knowledge.loader import load_topic
@@ -24,6 +25,13 @@ _SYSTEM_PROMPT_TEMPLATE = """\
 ресурсах: Росавиация (favt.gov.ru), Госуслуги (gosuslugi.ru).
 4. Если вопрос НЕ по теме дронов — вежливо откажись и предложи открыть меню бота.
 5. ВСЕГДА завершай ответ строкой: «ℹ️ Информация справочная — сверяй с официальными источниками.»
+
+ФОРМАТ ОТВЕТА — строго plain text:
+- НЕ используй **жирный**, *курсив*, __подчёркивание__, ~~зачёркивание__.
+- НЕ используй заголовки Markdown (### Заголовок).
+- НЕ используй таблицы Markdown.
+- Списки — только через "1.", "2.", "-" без какого-либо форматирования вокруг текста.
+- Пиши обычный текст — он отправляется в Telegram как есть, без рендеринга Markdown.
 
 БАЗА ЗНАНИЙ БОТА (разделы):
 {knowledge}
@@ -49,6 +57,16 @@ def _system_prompt() -> str:
     if _knowledge_context is None:
         _knowledge_context = _build_knowledge_context()
     return _SYSTEM_PROMPT_TEMPLATE.format(knowledge=_knowledge_context)
+
+
+def _strip_markdown(text: str) -> str:
+    """Remove common Markdown symbols that render as raw text in Telegram plain mode."""
+    text = re.sub(r'\*{1,3}', '', text)       # *, **, ***
+    text = re.sub(r'_{1,2}', '', text)         # _, __
+    text = re.sub(r'#{1,6}\s*', '', text)      # ### headers
+    text = re.sub(r'~~', '', text)             # ~~strikethrough~~
+    text = re.sub(r'`{1,3}', '', text)         # ` and ``` code blocks
+    return text
 
 
 def is_available() -> bool:
@@ -81,7 +99,8 @@ async def ask(question: str) -> str:
             max_tokens=600,
             temperature=0.4,
         )
-        return response.choices[0].message.content or "Не удалось получить ответ."
+        raw = response.choices[0].message.content or "Не удалось получить ответ."
+        return _strip_markdown(raw)
     except Exception as exc:
         logger.error("AI request failed: %s", exc)
         return (
