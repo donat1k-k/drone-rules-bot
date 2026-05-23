@@ -25,3 +25,11 @@ def back_kb() -> InlineKeyboardMarkup:
     builder = InlineKeyboardBuilder()
     builder.button(text="← Главное меню", callback_data="menu")
     return builder.as_markup()
+
+
+def search_result_kb(topic_id: str) -> InlineKeyboardMarkup:
+    builder = InlineKeyboardBuilder()
+    builder.button(text="Открыть раздел полностью", callback_data=f"topic:{topic_id}")
+    builder.button(text="← Главное меню", callback_data="menu")
+    builder.adjust(1)
+    return builder.as_markup()
