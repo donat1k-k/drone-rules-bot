@@ -1,6 +1,8 @@
 from aiogram.types import InlineKeyboardMarkup
 from aiogram.utils.keyboard import InlineKeyboardBuilder
 
+from src.config import AI_ENABLED, OPENAI_API_KEY
+
 _SECTIONS = [
     ("🚁 Подготовка к полёту", "topic:preparation"),
     ("🛡 Правила безопасности", "topic:safety"),
@@ -17,6 +19,8 @@ def main_menu_kb() -> InlineKeyboardMarkup:
     builder = InlineKeyboardBuilder()
     for label, cb_data in _SECTIONS:
         builder.button(text=label, callback_data=cb_data)
+    if AI_ENABLED and OPENAI_API_KEY:
+        builder.button(text="🤖 Спросить ИИ", callback_data="ai")
     builder.adjust(1)
     return builder.as_markup()
 

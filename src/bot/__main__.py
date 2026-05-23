@@ -2,9 +2,11 @@ import asyncio
 import logging
 
 from aiogram import Bot, Dispatcher
+from aiogram.fsm.storage.memory import MemoryStorage
 
 from src.config import BOT_TOKEN, LOG_LEVEL
 from src.bot.handlers import common, topics
+from src.bot.handlers import ai as ai_handler
 
 
 async def main() -> None:
@@ -13,9 +15,11 @@ async def main() -> None:
         format="%(asctime)s [%(levelname)s] %(name)s: %(message)s",
     )
     bot = Bot(token=BOT_TOKEN)
-    dp = Dispatcher()
-    dp.include_router(common.router)
+    dp = Dispatcher(storage=MemoryStorage())
+    # AI router first — its FSM state filter must win over common's fallback
+    dp.include_router(ai_handler.router)
     dp.include_router(topics.router)
+    dp.include_router(common.router)
     await dp.start_polling(bot)
 
 

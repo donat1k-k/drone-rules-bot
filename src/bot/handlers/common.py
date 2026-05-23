@@ -1,6 +1,7 @@
 from aiogram import Router
 from aiogram.exceptions import TelegramBadRequest
 from aiogram.filters import Command, CommandStart
+from aiogram.fsm.context import FSMContext
 from aiogram.types import CallbackQuery, Message
 
 from src.bot.keyboards import main_menu_kb, search_result_kb
@@ -34,17 +35,20 @@ _HELP = (
 
 
 @router.message(CommandStart())
-async def cmd_start(message: Message) -> None:
+async def cmd_start(message: Message, state: FSMContext) -> None:
+    await state.clear()
     await message.answer(_WELCOME, reply_markup=main_menu_kb(), parse_mode="Markdown")
 
 
 @router.message(Command("help"))
-async def cmd_help(message: Message) -> None:
+async def cmd_help(message: Message, state: FSMContext) -> None:
+    await state.clear()
     await message.answer(_HELP, reply_markup=main_menu_kb(), parse_mode="Markdown")
 
 
 @router.callback_query(lambda c: c.data == "menu")
-async def cb_menu(callback: CallbackQuery) -> None:
+async def cb_menu(callback: CallbackQuery, state: FSMContext) -> None:
+    await state.clear()
     try:
         await callback.message.edit_text(
             _WELCOME, reply_markup=main_menu_kb(), parse_mode="Markdown"

@@ -50,22 +50,22 @@
 
 ---
 
-## Stage 3 — AI-режим (опционально, если останется время)
+## Stage 3 — AI-режим ✅
 
 Цель: добавить пункт меню «Спросить ИИ» через OpenAI-compatible API.
 
 Переменные: `OPENAI_API_KEY`, `OPENAI_BASE_URL`, `OPENAI_MODEL`, `AI_ENABLED`.
 
-- [ ] `src/ai/client.py` — обёртка над OpenAI-compatible API (библиотека `openai`)
-- [ ] `requirements.txt` — добавить `openai`
-- [ ] `.env.example` — добавить `OPENAI_API_KEY`, `OPENAI_BASE_URL`, `OPENAI_MODEL`, `AI_ENABLED`
-- [ ] Системный промпт: запрет выдумывать законы, требование опираться на базу знаний
-- [ ] Контекст: загрузка содержимого YAML-топиков в системный промпт
-- [ ] `src/bot/keyboards.py` — кнопка «🤖 Спросить ИИ» в главном меню (только если `AI_ENABLED=true`)
-- [ ] Хендлер вопроса к AI и возврата ответа
-- [ ] Дисклеймер в каждом AI-ответе
-- [ ] Graceful degradation: при ошибке провайдера — «попробуйте позже», бот не падает
-- [ ] README: обновить раздел статуса и smoke-тест
+- [x] `src/ai/client.py` — обёртка над OpenAI-compatible API (библиотека `openai`)
+- [x] `requirements.txt` — добавить `openai`
+- [x] `.env.example` — добавить `OPENAI_API_KEY`, `OPENAI_BASE_URL`, `OPENAI_MODEL`, `AI_ENABLED`
+- [x] Системный промпт: запрет выдумывать законы, требование опираться на базу знаний
+- [x] Контекст: title + keywords всех 8 топиков в системном промпте
+- [x] `src/bot/keyboards.py` — кнопка «🤖 Спросить ИИ» в главном меню (только если `AI_ENABLED=true` и ключ задан)
+- [x] Хендлер вопроса к AI с FSM (`AiState.waiting_question`, aiogram MemoryStorage)
+- [x] Дисклеймер в каждом AI-ответе (через системный промпт)
+- [x] Graceful degradation: при ошибке провайдера — «попробуйте позже», бот не падает
+- [x] README: раздел «Настройка AI-режима», обновлён smoke-тест
 
 ---
 
