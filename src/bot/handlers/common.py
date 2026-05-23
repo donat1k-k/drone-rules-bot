@@ -4,7 +4,7 @@ from aiogram.filters import Command, CommandStart
 from aiogram.fsm.context import FSMContext
 from aiogram.types import CallbackQuery, Message
 
-from src.bot.keyboards import main_menu_kb, search_result_kb
+from src.bot.keyboards import feedback_no_result_kb, main_menu_kb, search_result_kb
 from src.knowledge.search import search_knowledge
 
 router = Router()
@@ -73,6 +73,6 @@ async def fallback(message: Message) -> None:
     else:
         await message.answer(
             "Не нашёл ответа на твой вопрос 🤔\n"
-            "Попробуй открыть нужный раздел из меню 👇",
-            reply_markup=main_menu_kb(),
+            "Можешь оставить вопрос — постараемся добавить ответ в базу знаний.",
+            reply_markup=feedback_no_result_kb(),
         )

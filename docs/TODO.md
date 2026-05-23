@@ -88,6 +88,22 @@
 
 ---
 
+## Stage 5 — Финальная полировка ✅
+
+Цель: UX-полировка, мини-тест, обратная связь, обновление документов перед защитой.
+
+- [x] `src/bot/handlers/weather.py` — FSM не сбрасывается при ошибке (не_найдено / недоступно); пользователь может сразу повторить ввод
+- [x] `src/bot/handlers/quiz.py` — мини-тест: 5 вопросов, inline-кнопки, ✅/❌ после каждого ответа, итог X/5
+- [x] `src/bot/handlers/feedback.py` — FSM «Оставить вопрос»; сохраняет только текст + время в `logs/feedback.txt`; личные данные не сохраняются
+- [x] `src/bot/keyboards.py` — кнопка «🧠 Мини-тест» в главном меню; `feedback_no_result_kb()`
+- [x] `src/bot/handlers/common.py` — fallback no-result использует `feedback_no_result_kb`
+- [x] `src/bot/__main__.py` — зарегистрированы роутеры quiz и feedback
+- [x] `.gitignore` — добавлен `logs/`
+- [x] `README.md` — раздел «Что реализовано», сценарий демонстрации, обновлён smoke-тест
+- [x] `docs/TODO.md`, `docs/HANDOFF.md`, `docs/DECISIONS.md` обновлены
+
+---
+
 ## Backlog / nice-to-have
 
 - Локализация (RU/EN).

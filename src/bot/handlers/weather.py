@@ -35,26 +35,28 @@ async def cb_weather(callback: CallbackQuery, state: FSMContext) -> None:
 
 @router.message(StateFilter(WeatherState.waiting_location))
 async def handle_weather_location(message: Message, state: FSMContext) -> None:
-    await state.clear()
     await message.bot.send_chat_action(chat_id=message.chat.id, action="typing")
 
     result = await weather_client.get_weather_for_location(message.text or "")
 
     if result.get("error") == "not_found":
+        # Keep FSM state — user can try again immediately
         await message.answer(
-            "🔍 Город не найден. Попробуй ввести координаты в формате `55.75, 37.61`.",
+            "🔍 Город не найден. Попробуй другое название или введи координаты: `55.75, 37.61`.",
             reply_markup=back_kb(),
             parse_mode="Markdown",
         )
         return
 
     if result.get("error") == "api_unavailable":
+        # Keep FSM state — user can retry after a moment
         await message.answer(
-            "⚠️ Сервис погоды временно недоступен. Попробуй позже.",
+            "⚠️ Сервис погоды временно недоступен. Попробуй ещё раз или нажми ← Главное меню.",
             reply_markup=back_kb(),
         )
         return
 
+    await state.clear()
     a = result["assessment"]
     text = (
         f"🌍 *{result['location']}*\n\n"

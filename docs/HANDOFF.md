@@ -3,7 +3,7 @@
 > Обновляй этот файл после каждого Stage / значимого изменения. Это главный документ для входящего агента.
 
 **Дата последнего обновления:** 2026-05-24
-**Текущий Stage:** 4 — завершён. Готов к деплою на VPS.
+**Текущий Stage:** 5 — завершён. Готов к защите.
 
 ---
 
@@ -13,13 +13,13 @@
 
 ## Current State
 
-Stage 4 завершён. Бот работает локально. Добавлены:
-- Погодная функция «🌦 Погода для полёта» через Open-Meteo API (без ключа).
-- Docker-деплой: `Dockerfile` + `docker-compose.yml`, запуск через `docker compose up -d --build`.
-- Улучшен раздел «Запрещённые зоны»: конкретные ссылки на Росавиацию, Небосвод, DJI Fly Safe; явный дисклеймер «бот не определяет запретные зоны».
-- Убраны ссылки на Airmap; добавлен Open-Meteo в links.yaml и SOURCES.md.
+Stage 5 завершён. Бот готов к защите. Добавлены:
+- **UX погоды:** при ошибке «город не найден» / «сервис недоступен» FSM-состояние сохраняется — пользователь может ввести новый город без возврата в меню.
+- **Мини-тест «🧠»:** 5 вопросов по безопасности/регистрации/зонам/RTH; inline-кнопки; ✅/❌ после каждого ответа; итог X/5.
+- **Обратная связь:** при нераспознанном вопросе — кнопка «✍️ Оставить вопрос»; сохраняется в `logs/feedback.txt` (только текст + время, без персданных).
+- **README:** раздел «Что реализовано», сценарий демонстрации, обновлён smoke-тест.
 
-Готов к деплою на VPS.
+Из Stage 4: погода (Open-Meteo), Docker-деплой, улучшенные запрещённые зоны — всё сохранено.
 
 ## Completed
 
@@ -29,21 +29,19 @@ Stage 4 завершён. Бот работает локально. Добавл
 - **Stage 3:** AI-режим через OpenAI-compatible API.
 - **Stage 3.1 (hotfix):** AI-ответы без Markdown-мусора.
 - **Stage 4:** погода + Docker.
-  - `src/weather/__init__.py` + `src/weather/client.py` — Open-Meteo: геокодинг + прогноз, оценка условий, graceful degradation
-  - `src/bot/handlers/weather.py` — FSM-хендлер `WeatherState.waiting_location`; поддержка города и координат (`lat, lon`); дисклеймер в каждом ответе
-  - `src/bot/keyboards.py` — кнопка «🌦 Погода для полёта» (всегда видима, ключ не нужен)
-  - `src/bot/__main__.py` — weather-роутер зарегистрирован перед common-роутером
-  - `requirements.txt` — добавлен `aiohttp>=3.9`
-  - `data/topics/restricted_zones.yaml` — улучшен текст, добавлены ссылки, убран Airmap
-  - `data/topics/links.yaml` — убран Airmap, добавлен Небосвод и Open-Meteo
-  - `Dockerfile` + `docker-compose.yml` — long polling, `env_file: .env`, `restart: unless-stopped`
-  - `README.md` — разделы «Погодная проверка» и «Запуск через Docker»; обновлён smoke-тест
-  - `docs/DECISIONS.md` — записи про Open-Meteo, aiohttp, Docker
-  - `docs/SOURCES.md` — добавлены Open-Meteo (секция 7) и Небосвод (секция 9)
+- **Stage 5:** финальная полировка.
+  - `src/bot/handlers/weather.py` — FSM не сбрасывается при ошибке; пользователь повторяет ввод без возврата в меню
+  - `src/bot/handlers/quiz.py` — мини-тест: 5 вопросов inline, ✅/❌ + объяснение, итог X/5
+  - `src/bot/handlers/feedback.py` — «Оставить вопрос»: FSM + сохранение в `logs/feedback.txt` (текст + время)
+  - `src/bot/keyboards.py` — кнопка «🧠 Мини-тест»; `feedback_no_result_kb()`
+  - `src/bot/handlers/common.py` — fallback no-result → `feedback_no_result_kb`
+  - `src/bot/__main__.py` — роутеры quiz и feedback зарегистрированы
+  - `.gitignore` — добавлен `logs/`
+  - `README.md` — «Что реализовано», сценарий демонстрации, smoke-тест расширен
 
 ## Files in Flight
 
-Нет. Все файлы Stage 4 завершены.
+Нет. Все файлы Stage 5 завершены.
 
 ## Failed Attempts
 
@@ -64,12 +62,13 @@ Stage 4 завершён. Бот работает локально. Добавл
 
 **Деплой на VPS для защиты:**
 
-1. Залить репозиторий на VPS (git clone или scp).
+1. Залить репозиторий на VPS (`git clone` или `scp`).
 2. Скопировать `.env.example` → `.env`, вписать `TELEGRAM_BOT_TOKEN`.
 3. `docker compose up -d --build`
 4. `docker compose logs -f` — убедиться, что бот запустился.
-5. Открыть Telegram, отправить `/start` — проверить меню.
-6. Сделать screenshot/screencast на запасной случай.
+5. `/start` в Telegram — проверить меню (должны быть «🌦 Погода» и «🧠 Мини-тест»).
+6. Прогнать smoke-тест из README полностью.
+7. Сделать screenshot/screencast на запасной случай.
 
 ## Notes for Next Agent
 

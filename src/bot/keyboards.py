@@ -20,6 +20,7 @@ def main_menu_kb() -> InlineKeyboardMarkup:
     for label, cb_data in _SECTIONS:
         builder.button(text=label, callback_data=cb_data)
     builder.button(text="🌦 Погода для полёта", callback_data="weather")
+    builder.button(text="🧠 Мини-тест", callback_data="quiz")
     if AI_ENABLED and OPENAI_API_KEY:
         builder.button(text="🤖 Спросить ИИ", callback_data="ai")
     builder.adjust(1)
@@ -29,6 +30,14 @@ def main_menu_kb() -> InlineKeyboardMarkup:
 def back_kb() -> InlineKeyboardMarkup:
     builder = InlineKeyboardBuilder()
     builder.button(text="← Главное меню", callback_data="menu")
+    return builder.as_markup()
+
+
+def feedback_no_result_kb() -> InlineKeyboardMarkup:
+    builder = InlineKeyboardBuilder()
+    builder.button(text="✍️ Оставить вопрос", callback_data="feedback_ask")
+    builder.button(text="← Главное меню", callback_data="menu")
+    builder.adjust(1)
     return builder.as_markup()
 
 
